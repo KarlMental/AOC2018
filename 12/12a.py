@@ -41,26 +41,27 @@ def change_state(state, plant_map, offset):
 def run_generations(number):
 	plant_map, state = get_input()
 	offset = 0
-	original_sum = sum([i-offset if value else 0 for i, value in enumerate(state)])
+	current_sum = sum([i-offset if value else 0 for i, value in enumerate(state)])
 	steady_state = 0
-	latest_diff = 0
+	steady_state_threshold = 100
+	diffs = [0, 0]
 	for i in range(1,number+1):
-		earlier_sum = sum([i-offset if value else 0 for i, value in enumerate(state)])
-		earlier_diff = latest_diff
+		earlier_sum = current_sum
+		diffs[0] = diffs[1]
 		state, offset = strip_state(state, offset)
 		state, offset = pad_state(state, offset)
 		state, offset = change_state(state, plant_map, offset)
 		current_sum = sum([i-offset if value else 0 for i, value in enumerate(state)])
-		latest_diff = current_sum - earlier_sum 
-		if earlier_diff == latest_diff:
+		diffs[1] = current_sum - earlier_sum 
+		if diffs[0] == diffs[1]:
 			steady_state += 1
 		else:
 			steady_state = 0
-		if steady_state == 100:
-			current_sum += (number-i)*latest_diff
+		if steady_state == steady_state_threshold:
+			current_sum += (number-i)*diffs[1]
 			break
 
-		print('Round: {}, Sum: {}, Diff: {}'.format(i, current_sum, latest_diff))
+		print('Round: {}, Sum: {}, Diff: {}'.format(i, current_sum, diffs[1]))
 	return current_sum
 
 print(run_generations(50000000000))
